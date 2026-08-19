@@ -13,11 +13,35 @@ export type LobbyPlayer = SessionUser & {
   connected: boolean;
 };
 
+export type OrderRoll = {
+  dice: [number, number];
+  total: number;
+};
+
+export type NetworkPlayer = {
+  id: string;
+  name: string;
+  position: number;
+  money: number;
+  token: TokenKind;
+};
+
+export type NetworkGameState = {
+  players: NetworkPlayer[];
+  turn: number;
+  owners: Record<number, string>;
+  dice: [number, number];
+  rolledThisTurn: boolean;
+  log: string;
+};
+
 export type LobbyState = {
   roomId: string;
   hostId: string | null;
-  status: "lobby" | "playing";
+  status: "lobby" | "ordering" | "playing";
   players: LobbyPlayer[];
+  orderRolls: Record<string, OrderRoll>;
+  game: NetworkGameState | null;
 };
 
 export type LobbyConnection = {
@@ -41,21 +65,18 @@ export async function createRoom(): Promise<string> {
     credentials: "include"
   });
   if (!response.ok) throw new Error("Impossible de créer le lobby.");
-  const data = await response.json();
-  return data.roomId;
+  return (await response.json()).roomId;
 }
 
 export async function logout() {
-  await fetch("/api/auth/logout", {
-    method: "POST",
-    credentials: "include"
-  });
+  await fetch("/api/auth/logout", { method: "POST", credentials: "include" });
 }
 
 export function connectLobby(
   roomId: string,
   onState: (state: LobbyState) => void,
-  onStatus: (status: "connecting" | "connected" | "disconnected" | "error") => void
+  onStatus: (status: "connecting" | "connected" | "disconnected" | "error") => void,
+  onError?: (message: string) => void
 ): LobbyConnection {
   const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
   const url = `${protocol}//${window.location.host}/api/rooms/${encodeURIComponent(roomId)}/ws`;
@@ -69,9 +90,8 @@ export function connectLobby(
     try {
       const message = JSON.parse(event.data);
       if (message.type === "LOBBY_STATE") onState(message.lobby);
-    } catch {
-      // Ignore malformed messages.
-    }
+      if (message.type === "ERROR") onError?.(message.message);
+    } catch {}
   });
 
   socket.addEventListener("close", () => onStatus("disconnected"));
@@ -79,9 +99,7 @@ export function connectLobby(
 
   return {
     send(message) {
-      if (socket.readyState === WebSocket.OPEN) {
-        socket.send(JSON.stringify(message));
-      }
+      if (socket.readyState === WebSocket.OPEN) socket.send(JSON.stringify(message));
     },
     close() {
       socket.close(1000, "Leaving lobby");

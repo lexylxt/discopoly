@@ -1,0 +1,38 @@
+/* V5 — order + per-player turns */
+.order-panel { max-width: 760px; }
+.order-panel h1 { margin: 0; font-size: 42px; }
+.order-list { display: grid; gap: 9px; margin: 24px 0; }
+.order-player {
+  display: grid;
+  grid-template-columns: 46px minmax(0, 1fr) 92px 90px;
+  gap: 12px;
+  align-items: center;
+  padding: 11px 13px;
+  border: 1px solid #30343e;
+  border-radius: 14px;
+  background: #1b1e25;
+}
+.order-dice { color: #d8dbe4; font-weight: 800; text-align: center; }
+.order-total { color: #8f95a4; font-size: 12px; text-align: right; }
+.order-roll-button { margin-top: 10px; }
+.turn-banner {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  padding: 10px 13px;
+  border-radius: 999px;
+  border: 1px solid #363a45;
+  background: rgba(17,19,24,.8);
+  color: #a4aab8;
+  font-size: 11px;
+  font-weight: 900;
+}
+.turn-banner.my-turn {
+  border-color: rgba(87,242,135,.35);
+  color: #84f0a7;
+  background: rgba(24,50,35,.82);
+}
+@media (max-width: 650px) {
+  .order-player { grid-template-columns: 40px minmax(0,1fr); }
+  .order-dice, .order-total { grid-column: 2; text-align: left; }
+}

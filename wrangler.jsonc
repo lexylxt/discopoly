@@ -8,9 +8,7 @@
     "directory": "./dist",
     "binding": "ASSETS",
     "not_found_handling": "single-page-application",
-    "run_worker_first": [
-      "/api/*"
-    ]
+    "run_worker_first": ["/api/*"]
   },
   "vars": {
     "DISCORD_CLIENT_ID": "1539691461774155776"
@@ -23,10 +21,10 @@
       }
     ]
   },
-  "exports": {
-    "LobbyRoom": {
-      "type": "durable-object",
-      "storage": "sqlite"
+  "migrations": [
+    {
+      "tag": "v1",
+      "new_sqlite_classes": ["LobbyRoom"]
     }
-  }
+  ]
 }
