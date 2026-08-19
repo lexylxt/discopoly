@@ -1,9 +1,32 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "discopoly",
+  "main": "worker/index.js",
   "compatibility_date": "2026-08-19",
+  "workers_dev": true,
   "assets": {
     "directory": "./dist",
-    "not_found_handling": "single-page-application"
+    "binding": "ASSETS",
+    "not_found_handling": "single-page-application",
+    "run_worker_first": [
+      "/api/*"
+    ]
+  },
+  "vars": {
+    "DISCORD_CLIENT_ID": "1539691461774155776"
+  },
+  "durable_objects": {
+    "bindings": [
+      {
+        "name": "LOBBIES",
+        "class_name": "LobbyRoom"
+      }
+    ]
+  },
+  "exports": {
+    "LobbyRoom": {
+      "type": "durable-object",
+      "storage": "sqlite"
+    }
   }
 }
